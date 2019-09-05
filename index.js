@@ -66,17 +66,17 @@ const recognize = async (email, filePath) => {
 	}
 };
 
-let csvData=[];
 const readCSV = ()=>{
+	let csvData=[];
 	fs.createReadStream('data.csv')
 		.pipe(parse({delimiter: ','}))
 		.on('data', function(csvrow) {
 			//console.log(csvrow);
 			//do something with csvrow
 
-			const id = `${csvrow[0]}@compal.com`;
 			const raw_type = ['Unwell', 'Hungry', 'Unwell', 'Sleepy', 'Unknown'];
 			const _type = ['Diper', 'Hungry', 'Pain', 'Sleepy', 'Unknown'];
+			let id = `${csvrow[0]}@compal.com`;
 			let type = _type[raw_type.indexOf(csvrow[2])];
 
 			let day = csvrow[6];
@@ -87,21 +87,20 @@ const readCSV = ()=>{
 			let MM = time.substr(2,2);
 			let ss = time.substr(4,2);
 			let fileName = `cry_2019_${mm}_${dd}_${hh}_${MM}_${ss}.wav`
+
 			if(id && type && fileName){
-				const directoryPath = path.join(__dirname, id, type, fileName);
+				let directoryPath = path.join(__dirname, id, type, fileName);
 				//console.log(directoryPath);
 				let email = id;
 				let src = directoryPath;
-				email = 'D3PA853WRF3MSG6GUH7J@compal.com'
-				src = 'C://Users/lenny_cheng/Desktop/git_test/crying_samples/D3PA853WRF3MSG6GUH7J@compal.com/Diper/cry_2019_07_17_08_40_56.wav';
-				res = recognize(email, src);
 				csvData.push({
-					email:id,
-					src:directoryPath});        
+					email:email,
+					src:src
+				});        
 			}
 		})
 		.on('end',function() {
-			//do something wiht csvData
+			//do something with csvData
 			const fields = ['email', 'src'];
 			const csv = json2csv.parse(csvData, fields);
 			fs.writeFile('clearData.csv', csv, (err)=>{
@@ -109,19 +108,32 @@ const readCSV = ()=>{
 				//console.log(csvData);
 				console.log('file saved');
 			});
+			csvData.reduce(async(promise, item)=>{
+				let email = item.email;
+				let src = item.src;
+				console.log(`email:${email}, src:${src}`);
+				email = 'D3PA853WRF3MSG6GUH7J@compal.com'
+				src = 'C://Users/lenny_cheng/Desktop/git_test/crying_samples/D3PA853WRF3MSG6GUH7J@compal.com/Diper/cry_2019_07_17_08_40_56.wav';
+				return promise.then(()=>{
+					let res = recognize(email, src);
+					return res;
+
+				}
+				);
+				/*
+				*/
+			},Promise.resolve());
+
 		});
-
-
 }
 
 
 getToken()
-  .then(res=>{
-	console.log(res);
-  })
-  .then(
-  )
-  .catch(err=>{
-	  console.log(err);
-  });
+	.then(res=>{
+		console.log(res);
+		readCSV();
+	})
+	.catch(err=>{
+		console.log(err);
+	});
 
