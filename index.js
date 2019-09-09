@@ -11,8 +11,9 @@ const cid =  '7018883e11b96b5b265b092f16daf5ea'
 
 let token;
 let config;
-const raw_type = ['Wet diaper', 'Hungry', 'Unwell', 'Sleepy', 'Unknown'];
-const _type = ['Diper', 'Hungry', 'Pain', 'Sleepy', 'Unknown'];
+const raw_type = ['Wet diaper', 'Hungry', 'Unwell', 'Sleepy', 'Unknown', 'others'];
+const _type = ['Diper', 'Hungry', 'Pain', 'Sleepy', 'Unknown', 'others'];
+const maxRequest = 1000;
 
 const getToken = async ()=>{
 	try {
@@ -65,7 +66,7 @@ const recognize = async (email, filePath) => {
 		return Promise.resolve(res);
 
 	} catch (error) {
-		console.log(error);
+		//console.log(error);
 	}
 };
 
@@ -91,7 +92,7 @@ const readCSV = async ()=>{
 				let ss = time.substr(4,2);
 				let fileName = `cry_2019_${mm}_${dd}_${hh}_${MM}_${ss}.wav`
 
-				if(id && type && fileName){
+				if(id && type && fileName && type!='Unknown'){
 					let directoryPath = path.join(__dirname, 'crying_samples', id, type, fileName);
 					//console.log(directoryPath);
 					let email = id;
@@ -127,26 +128,45 @@ const writeCSV = async (data)=>{
 	let csvData = await readCSV();
 	console.log(csvData);
 
-	csvData.reduce(async(promise, item)=>{
+	let count = 0;
+	let hit = 0;
+	let unknown = 0;
+	let missFile = [];
+	let parse = await csvData.reduce(async(promise, item)=>{
 		return promise.then(async()=>{
 			let email = item.email;
 			let src = item.src;
 			//console.log(`email:${email}, src:${src}`);
 			email = 'D3PA853WRF3MSG6GUH7J@compal.com'
+
+			count++;
+			if (count>maxRequest) return Promise.resolve();
+
 			try{
 				let res = await recognize(email, src);
-				console.log(`標籤:${res[0]}, 百分比:${res[1]}, 原始答案:${item.prevAns}, 使用者答案:${item.userAns}, 新答案:${_type[res[0]]}`)
-				item.newAns = res[0];
+				if(res[0]==-1){ 
+					unknown++
+					res[0]=4;
+				}else{
+					if(item.userAns == _type[res[0]]) hit++;
+				}
+
+				item.newAns = _type[res[0]];
+				console.log(`命中率:${hit}/${count}, 標籤:${res[0]}, 百分比:${res[1]}, 原始答案:${item.prevAns}, 使用者答案:${item.userAns}, 新答案:${item.newAns}`)
 			}catch(error){
-				console.log(error);
+				missFile.push(src);
+				console.log(`找不到檔案:${src}`);
 			}
 
 			return Promise.resolve();
 
 		});
 	},Promise.resolve());
-	/*
-	*/
 	writeCSV(csvData);
+	let hitRate = hit/count;
+	hitRate = hitRate*100;
+	console.log(`找不到檔案:------`);
+	console.log(missFile);
+	console.log(`命中率: ${hit}, 找不到答案:${unknown}`);
 })()
 
