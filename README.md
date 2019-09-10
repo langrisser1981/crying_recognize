@@ -11,9 +11,9 @@ node idnex.js
 
 ##### clearData.csv欄位格式定義為
 
-. email:使用者信箱
-. src:檔名，但因為是在我的機器上，所以前面的路徑可以忽略
-. prevAns:舊server給出的答案(svn)
-. userAns:使用者給出的答案
-. newAns:新server給出的答案(deep-learning)
+* email:使用者信箱
+* src:檔名，但因為是在我的機器上，所以前面的路徑可以忽略
+* prevAns:舊server給出的答案(svn)
+* userAns:使用者給出的答案
+* newAns:新server給出的答案(deep-learning)
 
