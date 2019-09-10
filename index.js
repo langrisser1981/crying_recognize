@@ -167,6 +167,6 @@ const writeCSV = async (data)=>{
 	hitRate = hitRate*100;
 	console.log(`找不到檔案:------`);
 	console.log(missFile);
-	console.log(`命中率: ${hit}, 找不到答案:${unknown}`);
+	console.log(`命中率: ${hitRate}, 找不到答案:${unknown}`);
 })()
 
