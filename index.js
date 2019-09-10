@@ -139,9 +139,9 @@ const writeCSV = async (data)=>{
 			//console.log(`email:${email}, src:${src}`);
 			email = 'D3PA853WRF3MSG6GUH7J@compal.com'
 
-			count++;
-			if (count>maxRequest) return Promise.resolve();
+			if (count>=maxRequest) return Promise.resolve();
 
+			count++;
 			try{
 				let res = await recognize(email, src);
 				if(res[0]==-1){ 
@@ -163,10 +163,9 @@ const writeCSV = async (data)=>{
 		});
 	},Promise.resolve());
 	writeCSV(csvData);
-	let hitRate = hit/count;
-	hitRate = hitRate*100;
+	let hitRate = hit/count*100;
 	console.log(`找不到檔案:------`);
 	console.log(missFile);
-	console.log(`命中率: ${hitRate}, 找不到答案:${unknown}`);
+	console.log(`命中率: ${hitRate}%, 找不到答案: ${unknown}`);
 })()
 
