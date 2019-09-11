@@ -81,7 +81,9 @@ const readCSV = async ()=>{
 
 				let id = `${csvrow[0]}@compal.com`;
 				let type = _type[raw_type.indexOf(csvrow[2])];
-				let userAns = _type[raw_type.indexOf(csvrow[3])];
+				let userAns_1 = _type[raw_type.indexOf(csvrow[3])];
+				let userAns_2 = _type[raw_type.indexOf(csvrow[4])];
+				let userAns_3 = _type[raw_type.indexOf(csvrow[5])];
 
 				let day = csvrow[6];
 				let time = csvrow[7];
@@ -101,7 +103,9 @@ const readCSV = async ()=>{
 						email:email,
 						src:src,
 						prevAns:type,
-						userAns:userAns,
+						userAns_1:userAns_1,
+						userAns_2:userAns_2,
+						userAns_3:userAns_3,
 						newAns:''
 					});        
 				}
@@ -163,7 +167,7 @@ const writeCSV = async (data)=>{
 					item.v2=res[1][1];
 					res[0]=4;
 				}else{
-					if(item.userAns == _type[res[0]]) {
+					if((item.userAns_1 == _type[res[0]]) || (item.userAns_2 == _type[res[0]])) {
 						hit++;
 						item.hit = 1;
 					}else{
@@ -177,7 +181,7 @@ const writeCSV = async (data)=>{
 
 				item.newAns = _type[res[0]];
 				item.distributed = res[1];
-				console.log(`命中率:${hit}/${count}, 標籤:${res[0]}, 百分比:${res[1]}, 原始答案:${item.prevAns}, 使用者答案:${item.userAns}, 新答案:${item.newAns}`)
+				console.log(`命中率:${hit}/${count}, 標籤:${res[0]}, 百分比:${res[1]}, 原始答案:${item.prevAns}, 使用者答案:${item.userAns_1}, 新答案:${item.newAns}`)
 			}catch(error){
 				missFile.push(src);
 				item.missFile = 1;
