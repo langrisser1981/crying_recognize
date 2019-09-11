@@ -114,7 +114,7 @@ const readCSV = async ()=>{
 }
 
 const writeCSV = async (data)=>{
-	const fields = ['email', 'src', 'prevAns', 'userAns', 'newAns'];
+	const fields = ['email', 'src', 'prevAns', 'userAns', 'newAns', 'diper', 'hungry', 'unwell', 'sleepy', 'hit', 'fail', 'v1', 'v2', 'unknown', 'missFile'];
 	const csv = json2csv.parse(data, fields);
 	fs.writeFile('clearData.csv', csv, (err)=>{
 		if(err) throw err;
@@ -136,25 +136,51 @@ const writeCSV = async (data)=>{
 		return promise.then(async()=>{
 			let email = item.email;
 			let src = item.src;
+			item.diper = '-';
+			item.hungry = '-';
+			item.unwell = '-';
+			item.sleepy = '-';
+			item.hit = 0;
+			item.fail = 0;
+			item.v1 = '-';
+			item.v2 = '-';
+			item.unknown = 0;
+			item.missFile = 0;
+			//
 			//console.log(`email:${email}, src:${src}`);
 			email = 'D3PA853WRF3MSG6GUH7J@compal.com'
 
 			if (count>=maxRequest) return Promise.resolve();
 
 			count++;
+
 			try{
 				let res = await recognize(email, src);
 				if(res[0]==-1){ 
 					unknown++
+					item.unknown=1;
+					item.v1=res[1][0];
+					item.v2=res[1][1];
 					res[0]=4;
 				}else{
-					if(item.userAns == _type[res[0]]) hit++;
+					if(item.userAns == _type[res[0]]) {
+						hit++;
+						item.hit = 1;
+					}else{
+						item.fail = 1;
+					}
+					item.diper = res[1][0];
+					item.hungry = res[1][1];
+					item.unwell = res[1][2];
+					item.sleepy = res[1][3];
 				}
 
 				item.newAns = _type[res[0]];
+				item.distributed = res[1];
 				console.log(`命中率:${hit}/${count}, 標籤:${res[0]}, 百分比:${res[1]}, 原始答案:${item.prevAns}, 使用者答案:${item.userAns}, 新答案:${item.newAns}`)
 			}catch(error){
 				missFile.push(src);
+				item.missFile = 1;
 				console.log(`找不到檔案:${src}`);
 			}
 
